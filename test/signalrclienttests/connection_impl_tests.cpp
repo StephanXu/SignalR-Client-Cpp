@@ -106,10 +106,10 @@ TEST(connection_impl_start, connection_state_is_connected_when_connection_establ
 
 TEST(connection_impl_start, connection_state_is_disconnected_when_connection_cannot_be_established)
 {
-    auto http_client = std::make_unique<test_http_client>([](const std::string&, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string&, http_request)
         {
             return http_response{ 404, "" };
-        });
+        }));
 
     auto connection =
         connection_impl::create(create_uri(), trace_level::none, std::make_shared<memory_log_writer>(),
@@ -233,10 +233,10 @@ TEST(connection_impl_start, start_logs_exceptions)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string&, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string&, http_request)
         {
             return http_response{ 404, "" };
-        });
+        }));
 
     auto connection =
         connection_impl::create(create_uri(), trace_level::errors, writer,
@@ -265,10 +265,10 @@ TEST(connection_impl_start, start_logs_exceptions)
 
 TEST(connection_impl_start, start_propagates_exceptions_from_negotiate)
 {
-    auto http_client = std::make_unique<test_http_client>([](const std::string&, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string&, http_request)
         {
             return http_response{ 404, "" };
-        });
+        }));
 
     auto connection =
         connection_impl::create(create_uri(), trace_level::none, std::make_shared<memory_log_writer>(),
@@ -373,10 +373,10 @@ TEST(connection_impl_start, start_fails_if_negotiate_request_fails)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string&, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string&, http_request)
         {
             return http_response{ 400, "" };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -405,7 +405,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_has_error)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             auto response_body =
                 url.find("/negotiate") != std::string::npos
@@ -413,7 +413,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_has_error)
                 : "";
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto connect_mre = manual_reset_event<void>();
     auto websocket_client = std::make_shared<test_websocket_client>();
@@ -450,7 +450,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_does_not_have_webs
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             auto response_body =
                 url.find("/negotiate") != std::string::npos
@@ -458,7 +458,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_does_not_have_webs
                 : "";
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -487,7 +487,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_does_not_have_tran
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             auto response_body =
                 url.find("/negotiate") != std::string::npos
@@ -495,7 +495,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_does_not_have_tran
                 : "";
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -524,7 +524,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_is_invalid)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             auto response_body =
                 url.find("/negotiate") != std::string::npos
@@ -532,7 +532,7 @@ TEST(connection_impl_start, start_fails_if_negotiate_response_is_invalid)
                 : "";
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -558,7 +558,7 @@ TEST(connection_impl_start, negotiate_follows_redirect)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -575,7 +575,7 @@ TEST(connection_impl_start, negotiate_follows_redirect)
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -606,7 +606,7 @@ TEST(connection_impl_start, negotiate_redirect_uses_accessToken)
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
     std::string accessToken;
 
-    auto http_client = std::make_unique<test_http_client>([&accessToken](const std::string& url, http_request request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([&accessToken](const std::string& url, http_request request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -624,7 +624,7 @@ TEST(connection_impl_start, negotiate_redirect_uses_accessToken)
 
             accessToken = request.headers["Authorization"];
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -655,7 +655,7 @@ TEST(connection_impl_start, negotiate_fails_after_too_many_redirects)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -665,7 +665,7 @@ TEST(connection_impl_start, negotiate_fails_after_too_many_redirects)
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -694,7 +694,7 @@ TEST(connection_impl_start, negotiate_fails_if_ProtocolVersion_in_response)
 {
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -703,7 +703,7 @@ TEST(connection_impl_start, negotiate_fails_if_ProtocolVersion_in_response)
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -732,7 +732,7 @@ TEST(connection_impl_start, negotiate_redirect_does_not_overwrite_url)
     std::shared_ptr<log_writer> writer(std::make_shared<memory_log_writer>());
     int redirectCount = 0;
 
-    auto http_client = std::make_unique<test_http_client>([&redirectCount](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([&redirectCount](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -750,7 +750,7 @@ TEST(connection_impl_start, negotiate_redirect_does_not_overwrite_url)
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = std::make_shared<test_websocket_client>();
 
@@ -793,7 +793,7 @@ TEST(connection_impl_start, negotiate_redirect_uses_own_query_string)
             callback(std::make_exception_ptr(std::runtime_error("connecting failed")));
         });
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -810,7 +810,7 @@ TEST(connection_impl_start, negotiate_redirect_uses_own_query_string)
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto connection = connection_impl::create(create_uri("a=b&c=d"), trace_level::errors, writer, std::move(http_client),
         [websocket_client](const signalr_client_config&) { return websocket_client; });
@@ -847,7 +847,7 @@ TEST(connection_impl_start, negotiate_with_negotiateVersion_uses_connectionToken
             callback(std::make_exception_ptr(std::runtime_error("connecting failed")));
         });
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -858,7 +858,7 @@ TEST(connection_impl_start, negotiate_with_negotiateVersion_uses_connectionToken
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto connection = connection_impl::create(create_uri(), trace_level::errors, writer, std::move(http_client),
         [websocket_client](const signalr_client_config&) { return websocket_client; });
@@ -888,12 +888,12 @@ TEST(connection_impl_start, correct_connection_id_returned_with_negotiateVersion
 
     auto websocket_client = create_test_websocket_client(
         /* send function */ [](const std::string&, std::function<void(std::exception_ptr)> callback) { callback(std::make_exception_ptr(std::runtime_error("should not be invoked"))); },
-        /* connect function */[](const std::string& url, std::function<void(std::exception_ptr)> callback)
+        /* connect function */[](const std::string&, std::function<void(std::exception_ptr)> callback)
         {
             callback(nullptr);
         });
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             std::string response_body = "";
             if (url.find("/negotiate") != std::string::npos)
@@ -904,7 +904,7 @@ TEST(connection_impl_start, correct_connection_id_returned_with_negotiateVersion
             }
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto connection = connection_impl::create(create_uri(), trace_level::errors, writer, std::move(http_client),
         [websocket_client](const signalr_client_config&) { return websocket_client; });
@@ -1447,7 +1447,7 @@ TEST(connection_impl_stop, stop_cancels_ongoing_start_request)
 {
     auto disconnect_completed_event = std::make_shared<cancellation_token>();
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             auto response_body =
                 url.find("/negotiate") != std::string::npos
@@ -1456,7 +1456,7 @@ TEST(connection_impl_stop, stop_cancels_ongoing_start_request)
                 : "";
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto wait_for_start_mre = manual_reset_event<void>();
 
@@ -1510,7 +1510,7 @@ TEST(connection_impl_stop, stop_cancels_ongoing_start_request)
 TEST(connection_impl_stop, DISABLED_ongoing_start_request_canceled_if_connection_stopped_before_init_message_received)
 {
     auto stop_mre = manual_reset_event<void>();
-    auto http_client = std::make_unique<test_http_client>([&stop_mre](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([&stop_mre](const std::string& url, http_request)
         {
             stop_mre.get();
 
@@ -1521,7 +1521,7 @@ TEST(connection_impl_stop, DISABLED_ongoing_start_request_canceled_if_connection
                 : "";
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = create_test_websocket_client();
 
@@ -1670,7 +1670,7 @@ TEST(connection_impl_config, custom_headers_set_in_requests)
 {
     auto writer = std::shared_ptr<log_writer>{ std::make_shared<memory_log_writer>() };
 
-    auto http_client = std::make_unique<test_http_client>([](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([](const std::string& url, http_request)
         {
             auto response_body =
                 url.find("/negotiate") != std::string::npos
@@ -1687,7 +1687,7 @@ TEST(connection_impl_config, custom_headers_set_in_requests)
             };*/
 
             return http_response{ 200, response_body };
-        });
+        }));
 
     auto websocket_client = create_test_websocket_client();
 
@@ -1843,7 +1843,7 @@ TEST(connection_id, connection_id_reset_when_starting_connection)
 
     auto websocket_client = create_test_websocket_client();
 
-    auto http_client = std::make_unique<test_http_client>([&fail_http_requests](const std::string& url, http_request)
+    auto http_client = std::unique_ptr<test_http_client>(new test_http_client([&fail_http_requests](const std::string& url, http_request)
         {
             if (!fail_http_requests) {
                 auto response_body =
@@ -1856,7 +1856,7 @@ TEST(connection_id, connection_id_reset_when_starting_connection)
             }
 
             return http_response{ 500, "" };
-        });
+        }));
 
     auto connection =
         connection_impl::create(create_uri(), trace_level::none, std::make_shared<memory_log_writer>(),
