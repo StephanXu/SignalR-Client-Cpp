@@ -4,6 +4,7 @@
 #pragma once
 
 #include "_exports.h"
+#include <string>
 
 namespace signalr
 {
